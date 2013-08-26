@@ -7,7 +7,8 @@ var EventEmitter = require("events").EventEmitter,
     async = require('misc').async,
     whenDone = require('misc').whenDone,
     returnObject = require('misc').returnObject,
-
+    fs = require('fs'),
+    util = require('util'),
     outputViewCounter = 1;
 
 /**
@@ -113,12 +114,15 @@ exports.commandList.prototype = {
  */
 exports.commandFactory = function (command, emitter, invoke, exit, environment) {
   var unit;
-  try {
+  try {        
     // Try built-in.
+    process.stderr.write("OHAI ");    
     unit = new exports.commandUnit.builtinCommand(command, emitter, invoke, exit, environment);
+    process.stderr.write("Unit = " + util.inspect(unit, false, null));
     unit.spawn();
   }
-  catch (e) {
+  catch (e) {        
+    process.stderr.write("Exception: " + e);
     try {
       // Try native command.
       unit = new exports.commandUnit.unixCommand(command, emitter, invoke, exit, environment);
@@ -180,7 +184,7 @@ exports.commandUnit.builtinCommand.prototype = new exports.commandUnit();
 
 exports.commandUnit.builtinCommand.prototype.spawn = function () {
   var that = this,
-      prefix = this.override || this.command[0];
+      prefix = this.override || this.command[0];  
 
   // Look up command.
   if (!builtin.commands[prefix]) {
